@@ -92,9 +92,13 @@ def pdf_tag(filePath: str):
     with pdfplumber.open(filePath) as pdf:
         for page in pdf.pages:
 
-            pdf_text += str(page.extract_text())
+            pdf_text = str(page.extract_text())
     return ray.get(pke_formatter.remote(ray.get(text_tag_str.remote(pdf_text)), filePath))
 
+# with pdfplumber.open("/home/vmware/Desktop/test_tag/aa.pdf") as pdf:
+#     for page in pdf.pages:
+#         text = page.extract_text()#提取文本
+#         print(text)
 @ray.remote
 def img_tag(image_path: str):
 
