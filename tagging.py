@@ -99,12 +99,24 @@ def pdf_tag(filePath: str):
 #     for page in pdf.pages:
 #         text = page.extract_text()#提取文本
 #         print(text)
+# @ray.remote
+# def img_tag(image_path: str):
+
+#     api_key = 'acc_ff4631a20588abc'
+
+#     api_secret = 'e770f0f82791079d06b3cd40301295ee'
+
+#     response = requests.post(
+#         'https://api.imagga.com/v2/tags',
+#         auth=(api_key, api_secret),
+#         files={'image': open(image_path, 'rb')})
+#     return ray.get(img_formatter.remote(response.json(), image_path))
 @ray.remote
 def img_tag(image_path: str):
 
-    api_key = 'acc_ff4631a20588abc'
+    api_key = 'acc_ec9b217a28c4e19'
 
-    api_secret = 'e770f0f82791079d06b3cd40301295ee'
+    api_secret = 'de16ce61cf5497198e70815b1104e6e7'
 
     response = requests.post(
         'https://api.imagga.com/v2/tags',
