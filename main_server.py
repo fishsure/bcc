@@ -123,6 +123,9 @@ async def main_logic(websocket, path):
                     # print(recv_list[2])
                     # Neo4jServer.delete_node(recv_list[1])
                     # Neo4jServer.create_newnode(recv_list[2])
+                    #if string.startswith("abcde"):
+                    if recv_list[2].startswith(".Trash-1000"):
+                        Neo4jServer.delete_node(recv_list[1].lower())
                     
                 elif recv_list[0] == "delete":
                     print("正在删除")
