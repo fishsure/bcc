@@ -17,4 +17,4 @@ def main(query):
     res = requests.post(url, data=data).json()
     print(res['translateResult'][0][0]['tgt'])  # 打印翻译后的结果
 
-main('The bra')
+main('The sun')

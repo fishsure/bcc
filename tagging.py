@@ -8,7 +8,8 @@ from datetime import datetime
 from tinytag import TinyTag
 from pydub import AudioSegment
 import ray
-
+import requests
+import time
 ray.init(address="auto", _redis_password='5241590000000000')
 
 label_num = 6
@@ -28,19 +29,7 @@ def pke_formatter(res, filePath):
         'path: ' + '\'' + filePath + '\''
         + '}'
     }
-@ray.remote
-# def img_formatter(res, filePath):
     
-    
-#     return {
-#         'labels': [item['tag']['en'] for item in ray.get(get_top_keys.remote(res['result']['tags']))],
-#         'property': '{' +
-#         'name: ' + '\'' + path.split(filePath)[1] + '\'' + ', ' +
-#         'ext: ' + '\'' + path.splitext(filePath)[-1][1:] + '\'' + ', ' +
-#         'size: ' + '\'' + str(path.getsize(filePath)) + '\''+ ', ' +
-#         'path: ' + '\'' + filePath + '\''
-#         + '}'
-#     }
 def translate(query):
     url = 'http://fanyi.youdao.com/translate'
     data = {
@@ -57,8 +46,21 @@ def translate(query):
     }
     res = requests.post(url, data=data).json()
     return res['translateResult'][0][0]['tgt']  # 打印翻译后的结果
+@ray.remote
+# def img_formatter(res, filePath):
+#     return {
+#         'labels': [item['tag']['en'] for item in ray.get(get_top_keys.remote(res['result']['tags']))],
+#         'property': '{' +
+#         'name: ' + '\'' + path.split(filePath)[1] + '\'' + ', ' +
+#         'ext: ' + '\'' + path.splitext(filePath)[-1][1:] + '\'' + ', ' +
+#         'size: ' + '\'' + str(path.getsize(filePath)) + '\''+ ', ' +
+#         'path: ' + '\'' + filePath + '\''
+#         + '}'
+#     }
+
 def img_formatter(res, filePath):
     # 翻译英文标签为中文
+    time.sleep(3)
     labels = [item['tag']['en'] for item in ray.get(get_top_keys.remote(res['result']['tags']))]
     labels_cn = []
     for label in labels:
@@ -120,7 +122,7 @@ def text_tag(filePath: str):
     
 @ray.remote
 def pdf_tag(filePath: str):
-
+    time.sleep(3)
     pdf_text = ''
 
     with pdfplumber.open(filePath) as pdf:
@@ -147,6 +149,7 @@ def pdf_tag(filePath: str):
 #     return ray.get(img_formatter.remote(response.json(), image_path))
 @ray.remote
 def img_tag(image_path: str):
+    time.sleep(3)
     api_key = 'acc_ec9b217a28c4e19'
 
     api_secret = 'de16ce61cf5497198e70815b1104e6e7'
@@ -156,26 +159,7 @@ def img_tag(image_path: str):
         auth=(api_key, api_secret),
         files={'image': open(image_path, 'rb')})
     return ray.get(img_formatter.remote(response.json(), image_path))
-# import requests
 
-# def main(query):
-#     url = 'http://fanyi.youdao.com/translate'
-#     data = {
-#         "i": query,  # 待翻译的字符串
-#         "from": "AUTO",
-#         "to": "AUTO",
-#         "smartresult": "dict",
-#         "client": "fanyideskweb",
-#         "salt": "16081210430989",
-#         "doctype": "json",
-#         "version": "2.1",
-#         "keyfrom": "fanyi.web",
-#         "action": "FY_BY_CLICKBUTTION"
-#     }
-#     res = requests.post(url, data=data).json()
-#     print(res['translateResult'][0][0]['tgt'])  # 打印翻译后的结果
-
-# main('The world')
 @ray.remote
 def speech_to_text(filePath: str):
     audioFile = path.join(path.dirname(path.realpath(__file__)), filePath)
@@ -202,6 +186,7 @@ def wav_tag(filePath: str):
 
 @ray.remote
 def audio_tag(filePath: str):
+    time.sleep(3)
     dst = filePath + '.tmp.wav'
 
     # convert wav to mp3
@@ -209,6 +194,8 @@ def audio_tag(filePath: str):
 
     sound.export(dst, format="wav")
 
+    # return_value = ray.get(pke_formatter.remote(ray.get(text_tag_str.remote(
+    #     ray.get(speech_to_text.remote(dst)), filePath))))
     return_value = ray.get(pke_formatter.remote(ray.get(text_tag_str.remote(
         ray.get(speech_to_text.remote(dst)))),filePath))
     os.remove(dst)
@@ -217,7 +204,7 @@ def audio_tag(filePath: str):
 
 @ray.remote
 def video_tag(filePath: str):
-
+    
     tag = TinyTag.get(filePath)
 
     return ray.get(meta_data_formatter.remote((tag.artist, tag.title), filePath))
