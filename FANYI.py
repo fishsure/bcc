@@ -15,6 +15,8 @@ def main(query):
         "action": "FY_BY_CLICKBUTTION"
     }
     res = requests.post(url, data=data).json()
+    print(type(res['translateResult'][0][0]['tgt']))
+    print(type("hello"))
     print(res['translateResult'][0][0]['tgt'])  # 打印翻译后的结果
 
 main('The sun')

@@ -46,7 +46,6 @@ def translate(query):
     }
     res = requests.post(url, data=data).json()
     return res['translateResult'][0][0]['tgt']  # 打印翻译后的结果
-@ray.remote
 # def img_formatter(res, filePath):
 #     return {
 #         'labels': [item['tag']['en'] for item in ray.get(get_top_keys.remote(res['result']['tags']))],
@@ -57,7 +56,7 @@ def translate(query):
 #         'path: ' + '\'' + filePath + '\''
 #         + '}'
 #     }
-
+@ray.remote
 def img_formatter(res, filePath):
     # 翻译英文标签为中文
     time.sleep(3)
@@ -204,7 +203,7 @@ def audio_tag(filePath: str):
 
 @ray.remote
 def video_tag(filePath: str):
-    
+
     tag = TinyTag.get(filePath)
 
     return ray.get(meta_data_formatter.remote((tag.artist, tag.title), filePath))
