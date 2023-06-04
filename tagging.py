@@ -10,7 +10,9 @@ from pydub import AudioSegment
 import ray
 import requests
 import time
-ray.init(address="auto", _redis_password='5241590000000000')
+
+if not ray.is_initialized():
+    ray.init(address="auto", _redis_password='5241590000000000')
 
 label_num = 6
 

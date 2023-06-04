@@ -7,6 +7,7 @@ ray.init(address="auto", _redis_password='5241590000000000')
 label_num = 6
 @ray.remote
 def get_top_keys(key_list: list):
+    print("777")
     return key_list[0: min(label_num, len(key_list))]
 def translate(query):
     url = 'http://fanyi.youdao.com/translate'
@@ -22,6 +23,7 @@ def translate(query):
         "keyfrom": "fanyi.web",
         "action": "FY_BY_CLICKBUTTION"
     }
+    print("888")
     res = requests.post(url, data=data).json()
     return res['translateResult'][0][0]['tgt']  # 打印翻译后的结果
 @ray.remote
@@ -30,6 +32,7 @@ def img_formatter(res, filePath):
     time.sleep(3)
     labels = [item['tag']['en'] for item in ray.get(get_top_keys.remote(res['result']['tags']))]
     labels_cn = []
+    print("666")
     for label in labels:
         label_cn = translate(label)
         labels_cn.append(label_cn)
@@ -52,7 +55,12 @@ def img_tag(image_path: str):
         'https://api.imagga.com/v2/tags',
         auth=(api_key, api_secret),
         files={'image': open(image_path, 'rb')})
-    print(ray.get(img_formatter.remote(response.json(), image_path)))
-def main():
-    ray.get(img_tag.remote("/root/jfs/357.png"))
-main()
+    print("333")
+    result=ray.get(img_formatter.remote(response.json(), image_path))
+    print(result)
+    print("111")
+def ok():
+    print("000")
+    ray.get(img_tag.remote("/root/jfs/bnb.png"))
+    print("222")
+ok()
